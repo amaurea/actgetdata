@@ -75,6 +75,9 @@ struct FormatType *GetFormat(const char *filedir, const char *linterp_prefix, in
 /***************************************************************************/
 void GetDataClose(struct FormatType *F);
 
+int GetNEntry(const struct FormatType * F);
+int GetEntryInfo(const struct FormatType * F, int ind, char ** category,
+		char ** name, char * field_code);
 
 #ifdef __cplusplus
 } // extern "C"

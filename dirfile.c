@@ -21,7 +21,6 @@ ACTpolDirfile_open(const char *ifilename)
     char *filename = strdup(ifilename);
     if (strcmp(filename + (len-4), ".zip") == 0) {
         filename[len-4] = '\0';
-        printf("filename = %s\n", filename);
     }
 
     int status;
@@ -108,8 +107,6 @@ void * ACTpolDirfile_read_channel( char typechar, const ACTpolDirfile *dirfile,
     size_t nbytes = nsamples * bytes_per_sample(typechar);
 
     void *data = malloc( nbytes );
-
-    printf( "%d %d\n", nframes, samples_per_frame );
 
     *nsamples_out = GetData( F, channelname, 0, 0,
             nsamples / samples_per_frame,
