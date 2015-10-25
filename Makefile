@@ -5,7 +5,7 @@ all: libactgetdata.a libactgetdata.so
 libactgetdata.a: getdata.o dirfile.o
 	ar crs $@ $^
 libactgetdata.so: dirfile.o getdata.o
-	gcc -shared -fPIC -o $@ -I. $^ $(LFLAGS) -lzzip -lslim -lc
+	gcc -shared -fPIC -o $@ -I. $^ $(LDFLAGS) -lzzip -lslim -lc
 
 %.o: %.c
 	gcc -fPIC -c $(CFLAGS) -I. $<
