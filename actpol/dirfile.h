@@ -21,6 +21,10 @@ ACTpolDirfile_close(ACTpolDirfile *dirfile);
 bool
 ACTpolDirfile_has_channel(const ACTpolDirfile *dirfile, const char *channel );
 
+void *
+ACTpolDirfile_read_channel( char typechar, const ACTpolDirfile *dirfile,
+        const char *channelname, int *nsamples_out );
+
 int16_t *
 ACTpolDirfile_read_int16_channel(const ACTpolDirfile *dirfile,
         const char *channelname, int *nsamples );

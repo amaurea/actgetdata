@@ -4,11 +4,11 @@ CFLAGS ?= -O2
 all: libactgetdata.a libactgetdata.so
 libactgetdata.a: getdata.o dirfile.o
 	ar crs $@ $^
-libactgetdata.so: getdata.o dirfile.o
-	gcc -shared -o $@ $^
+libactgetdata.so: dirfile.o getdata.o
+	gcc -shared -fPIC -o $@ -I. $^ -lzzip -lslim -lc
 
 %.o: %.c
-	gcc -fPIC -c -I. $(CFLAGS) $<
+	gcc -fPIC -c $(CFLAGS) -I. $<
 
 install: all
 	mkdir -p $(PREFIX)/include/actpol $(PREFIX)/lib

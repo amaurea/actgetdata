@@ -81,8 +81,7 @@ ACTpolDirfile_has_channel(const ACTpolDirfile *dirfile, const char *channel)
     return true;
 }
 
-static void *
-ACTpolDirfile_read_channel( char typechar, const ACTpolDirfile *dirfile,
+void * ACTpolDirfile_read_channel( char typechar, const ACTpolDirfile *dirfile,
         const char *channelname, int *nsamples_out )
 {
     int status = 0;
