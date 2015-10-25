@@ -8,7 +8,7 @@ struct FormatType;
 
 typedef struct
 {
-    struct FormatType *format;
+	struct FormatType *format;
 }
 ACTpolDirfile;
 
@@ -23,33 +23,33 @@ ACTpolDirfile_has_channel(const ACTpolDirfile *dirfile, const char *channel );
 
 void *
 ACTpolDirfile_read_channel( char typechar, const ACTpolDirfile *dirfile,
-        const char *channelname, int *nsamples_out );
+		const char *channelname, int *nsamples_out );
 
 int16_t *
 ACTpolDirfile_read_int16_channel(const ACTpolDirfile *dirfile,
-        const char *channelname, int *nsamples );
+		const char *channelname, int *nsamples );
 
 uint16_t *
 ACTpolDirfile_read_uint16_channel(const ACTpolDirfile *dirfile,
-        const char *channelname, int *nsamples );
+		const char *channelname, int *nsamples );
 
 int32_t *
 ACTpolDirfile_read_int32_channel(const ACTpolDirfile *dirfile,
-        const char *channelname, int *nsamples );
+		const char *channelname, int *nsamples );
 
 uint32_t *
 ACTpolDirfile_read_uint32_channel(const ACTpolDirfile *dirfile,
-        const char *channelname, int *nsamples );
+		const char *channelname, int *nsamples );
 
 float *
 ACTpolDirfile_read_float_channel(const ACTpolDirfile *dirfile,
-        const char *channelname, int *nsamples );
+		const char *channelname, int *nsamples );
 
 double *
 ACTpolDirfile_read_double_channel(const ACTpolDirfile *dirfile,
-        const char *channelname, int *nsamples );
+		const char *channelname, int *nsamples );
 
 uint32_t
 ACTpolDirfile_read_uint32_sample(const ACTpolDirfile *dirfile,
-        const char *channelname, int index );
+		const char *channelname, int index );
 

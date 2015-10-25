@@ -9,176 +9,176 @@
 #include "actpol/getdata.h"
 
 #define dirfile_print_errstatus(STATUS) {\
-    if ( STATUS != GD_E_OK ) \
-        fprintf(stderr, "line %d: *** dirfile error code: %d\n", __LINE__, status); \
+	if ( STATUS != GD_E_OK ) \
+	fprintf(stderr, "line %d: *** dirfile error code: %d\n", __LINE__, status); \
 }
 
-ACTpolDirfile *
+	ACTpolDirfile *
 ACTpolDirfile_open(const char *ifilename)
 {
-    // remove .zip extension (if present)
-    size_t len = strlen(ifilename);
-    char *filename = strdup(ifilename);
-    if (strcmp(filename + (len-4), ".zip") == 0) {
-        filename[len-4] = '\0';
-    }
+	// remove .zip extension (if present)
+	size_t len = strlen(ifilename);
+	char *filename = strdup(ifilename);
+	if (strcmp(filename + (len-4), ".zip") == 0) {
+		filename[len-4] = '\0';
+	}
 
-    int status;
-    struct FormatType *format = GetFormat(filename, NULL, &status);
-    free(filename);
-    if (status != 0) {
-        return NULL;
-    }
+	int status;
+	struct FormatType *format = GetFormat(filename, NULL, &status);
+	free(filename);
+	if (status != 0) {
+		return NULL;
+	}
 
-    assert(format);
-    ACTpolDirfile *dirfile = malloc(sizeof(ACTpolDirfile));
-    dirfile->format = format;
-    return dirfile;
+	assert(format);
+	ACTpolDirfile *dirfile = malloc(sizeof(ACTpolDirfile));
+	dirfile->format = format;
+	return dirfile;
 }
 
-void
+	void
 ACTpolDirfile_close(ACTpolDirfile *dirfile)
 {
-    GetDataClose(dirfile->format);
-    free(dirfile->format);
-    free(dirfile);
+	GetDataClose(dirfile->format);
+	free(dirfile->format);
+	free(dirfile);
 }
 
-static size_t
+	static size_t
 bytes_per_sample( char typechar )
 {
-    switch ( typechar )
-    {
-        case 'c':
-            return 1;
+	switch ( typechar )
+	{
+		case 'c':
+			return 1;
 
-        case 's':
-        case 'u':
-            return 2;
+		case 's':
+		case 'u':
+			return 2;
 
-        case 'S':
-        case 'U':
-        case 'i':
-        case 'f':
-            return 4;
+		case 'S':
+		case 'U':
+		case 'i':
+		case 'f':
+			return 4;
 
-        case 'd':
-            return 8;
-    }
+		case 'd':
+			return 8;
+	}
 
-    assert( 1 == 0 );
-    return 0;
+	assert( 1 == 0 );
+	return 0;
 }
 
-bool
+	bool
 ACTpolDirfile_has_channel(const ACTpolDirfile *dirfile, const char *channel)
 {
-    int status;
-    int samples_per_frame = GetSamplesPerFrame(dirfile->format, channel, &status);
-    if ( status != GD_E_OK || samples_per_frame <= 0 )
-        return false;
-    return true;
+	int status;
+	int samples_per_frame = GetSamplesPerFrame(dirfile->format, channel, &status);
+	if ( status != GD_E_OK || samples_per_frame <= 0 )
+		return false;
+	return true;
 }
 
 void * ACTpolDirfile_read_channel( char typechar, const ACTpolDirfile *dirfile,
-        const char *channelname, int *nsamples_out )
+		const char *channelname, int *nsamples_out )
 {
-    int status = 0;
-    const struct FormatType *F = dirfile->format;
+	int status = 0;
+	const struct FormatType *F = dirfile->format;
 
-    int nframes = GetNFrames( F, &status, channelname );
-    if ( status != GD_E_OK )
-    {
-        dirfile_print_errstatus(status);
-        return NULL;
-    }
-    assert( nframes > 0 );
+	int nframes = GetNFrames( F, &status, channelname );
+	if ( status != GD_E_OK )
+	{
+		dirfile_print_errstatus(status);
+		return NULL;
+	}
+	assert( nframes > 0 );
 
-    int samples_per_frame = GetSamplesPerFrame( F, channelname, &status );
-    if ( status != GD_E_OK )
-    {
-        dirfile_print_errstatus(status);
-        return NULL;
-    }
-    assert( samples_per_frame > 0 );
+	int samples_per_frame = GetSamplesPerFrame( F, channelname, &status );
+	if ( status != GD_E_OK )
+	{
+		dirfile_print_errstatus(status);
+		return NULL;
+	}
+	assert( samples_per_frame > 0 );
 
-    // last frame may be partial
-    int nsamples = (nframes + 1) * samples_per_frame - 1;
-    size_t nbytes = nsamples * bytes_per_sample(typechar);
+	// last frame may be partial
+	int nsamples = (nframes + 1) * samples_per_frame - 1;
+	size_t nbytes = nsamples * bytes_per_sample(typechar);
 
-    void *data = malloc( nbytes );
+	void *data = malloc( nbytes );
 
-    *nsamples_out = GetData( F, channelname, 0, 0,
-            nsamples / samples_per_frame,
-            nsamples % samples_per_frame,
-            typechar, data, &status );
+	*nsamples_out = GetData( F, channelname, 0, 0,
+			nsamples / samples_per_frame,
+			nsamples % samples_per_frame,
+			typechar, data, &status );
 
-    if ( status != GD_E_OK || *nsamples_out <= 0 )
-    {
-        dirfile_print_errstatus( status );
-        free( data );
-        return NULL;
-    }
+	if ( status != GD_E_OK || *nsamples_out <= 0 )
+	{
+		dirfile_print_errstatus( status );
+		free( data );
+		return NULL;
+	}
 
-    return data;
+	return data;
 }
 
-int16_t *
+	int16_t *
 ACTpolDirfile_read_int16_channel(const ACTpolDirfile *dirfile,
-        const char *channelname, int *nsamples )
+		const char *channelname, int *nsamples )
 {
-    return (int16_t *) ACTpolDirfile_read_channel( 's', dirfile, channelname, nsamples );
+	return (int16_t *) ACTpolDirfile_read_channel( 's', dirfile, channelname, nsamples );
 }
 
-uint16_t *
+	uint16_t *
 ACTpolDirfile_read_uint16_channel(const ACTpolDirfile *dirfile,
-        const char *channelname, int *nsamples )
+		const char *channelname, int *nsamples )
 {
-    return (uint16_t *) ACTpolDirfile_read_channel( 'u', dirfile, channelname, nsamples );
+	return (uint16_t *) ACTpolDirfile_read_channel( 'u', dirfile, channelname, nsamples );
 }
 
-int32_t *
+	int32_t *
 ACTpolDirfile_read_int32_channel(const ACTpolDirfile *dirfile,
-        const char *channelname, int *nsamples )
+		const char *channelname, int *nsamples )
 {
-    return (int32_t *) ACTpolDirfile_read_channel( 'S', dirfile, channelname, nsamples );
+	return (int32_t *) ACTpolDirfile_read_channel( 'S', dirfile, channelname, nsamples );
 }
 
-uint32_t *
+	uint32_t *
 ACTpolDirfile_read_uint32_channel(const ACTpolDirfile *dirfile,
-        const char *channelname, int *nsamples )
+		const char *channelname, int *nsamples )
 {
-    return (uint32_t *) ACTpolDirfile_read_channel( 'U', dirfile, channelname, nsamples );
+	return (uint32_t *) ACTpolDirfile_read_channel( 'U', dirfile, channelname, nsamples );
 }
 
-float *
+	float *
 ACTpolDirfile_read_float_channel(const ACTpolDirfile *dirfile,
-        const char *channelname, int *nsamples )
+		const char *channelname, int *nsamples )
 {
-    return (float *) ACTpolDirfile_read_channel( 'f', dirfile, channelname, nsamples );
+	return (float *) ACTpolDirfile_read_channel( 'f', dirfile, channelname, nsamples );
 }
 
-double *
+	double *
 ACTpolDirfile_read_double_channel(const ACTpolDirfile *dirfile,
-        const char *channelname, int *nsamples )
+		const char *channelname, int *nsamples )
 {
-    return (double *) ACTpolDirfile_read_channel( 'd', dirfile, channelname, nsamples );
+	return (double *) ACTpolDirfile_read_channel( 'd', dirfile, channelname, nsamples );
 }
 
-uint32_t
+	uint32_t
 ACTpolDirfile_read_uint32_sample(const ACTpolDirfile *dirfile,
-        const char *channelname, int index )
+		const char *channelname, int index )
 {
-    uint32_t sample;
-    int status;
-    int n = GetData(dirfile->format, channelname, 0, index, 0, 1, 'U', &sample, &status);
+	uint32_t sample;
+	int status;
+	int n = GetData(dirfile->format, channelname, 0, index, 0, 1, 'U', &sample, &status);
 
-    if ( status != GD_E_OK || n != 1 )
-    {
-        dirfile_print_errstatus( status );
-        return 0;
-    }
+	if ( status != GD_E_OK || n != 1 )
+	{
+		dirfile_print_errstatus( status );
+		return 0;
+	}
 
-    return sample;
+	return sample;
 }
 

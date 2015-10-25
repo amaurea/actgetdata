@@ -42,10 +42,10 @@ struct FormatType;
 /*                                                                         */
 /***************************************************************************/
 int GetData(const struct FormatType *F, const char *field_code,
-             int first_sframe, int first_samp,
-             int num_sframes, int num_samp,
-             char return_type, void *data_out,
-            int *error_code);
+	int first_sframe, int first_samp,
+	int num_sframes, int num_samp,
+	char return_type, void *data_out,
+	int *error_code);
 
 /***************************************************************************/
 /*                                                                         */
@@ -77,7 +77,7 @@ void GetDataClose(struct FormatType *F);
 
 int GetNEntry(const struct FormatType * F);
 int GetEntryInfo(const struct FormatType * F, int ind, char ** category,
-		char ** name, char * field_code);
+	char ** name, char * field_code);
 
 #ifdef __cplusplus
 } // extern "C"
