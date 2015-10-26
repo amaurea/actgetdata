@@ -109,7 +109,7 @@ struct FormatType {
 	int n_mplex;
 	struct BitEntryType *bitEntries;
 	int n_bit;
-	ZZIP_FILE *fp_prev;
+	ZZIP_FILE *fp_base;
 };
 
 const int	MAX_GETDATA_FILES_OPEN=128;
@@ -263,7 +263,7 @@ static void FreeF(struct FormatType *F) {
 	if (F->n_linterp >0) free(F->linterpEntries);
 	if (F->n_mplex > 0) free(F->mplexEntries);
 	if (F->n_bit > 0) free(F->bitEntries);
-	if (F->fp_prev) zzip_fclose(F->fp_prev);
+	if (F->fp_base) zzip_fclose(F->fp_base);
 }
 
 /***************************************************************************/
@@ -694,7 +694,7 @@ struct FormatType *GetFormat(const char *filedir, const char *linterp_prefix, in
 	F->linterpEntries = NULL;
 	F->mplexEntries = NULL;
 	F->bitEntries = NULL;
-	F->fp_prev = fp;
+	F->fp_base = fp;
 
 	/* Parse the file.	This will take care of any necessary inclusions */
 	i_include = 1;
@@ -1200,7 +1200,7 @@ static int GetSPF(int recurse_level, const char *field_code, const struct Format
 }
 
 static inline void open_raw(struct FileHandle *R, const char *FileDirName,
-		const char *ChannelName, ZZIP_FILE * fp_prev) {
+		const char *ChannelName, ZZIP_FILE * fp_base) {
 
 	char datafilename[2 * MAX_FILENAME_LENGTH + FIELD_LENGTH + 2];
 
@@ -1209,7 +1209,7 @@ static inline void open_raw(struct FileHandle *R, const char *FileDirName,
 	/* Try to open raw file */
 	snprintf(datafilename, 2 * MAX_FILENAME_LENGTH + FIELD_LENGTH + 2, 
 			"%s/%s", FileDirName, ChannelName);
-	R->fp = zzip_freopen(datafilename, "r", fp_prev);
+	R->fp = zzip_freopen(datafilename, "rq", fp_base);
 	if (R->fp)
 		return;
 
@@ -1265,7 +1265,7 @@ static int DoIfRaw(const struct FormatType *F, const char *field_code,
 	ns = num_samp + num_frames*R->samples_per_frame;
 
 	/** open the file */
-	open_raw(&FH, F->FileDirName, R->file, F->fp_prev);
+	open_raw(&FH, F->FileDirName, R->file, F->fp_base);
 	if (FH.fp<0 && FH.slim == NULL) {
 		*n_read = 0;
 		*error_code = GD_E_OPEN_RAWFIELD;
@@ -1292,8 +1292,8 @@ static int DoIfRaw(const struct FormatType *F, const char *field_code,
 
 	free(databuffer);
 
-	/*if (FH.fp >= 0)
-		zzip_close(FH.fp);*/
+	if (FH.fp >= 0)
+		zzip_close(FH.fp);
 	if (FH.slim != NULL)
 		slimclose(FH.slim);
 
@@ -1893,12 +1893,12 @@ void MakeDummyLinterp(struct LinterpEntryType *E) {
 	E->y[1] = 1;
 }
 
-static int ReadLinterpFile(struct LinterpEntryType *E, ZZIP_FILE * fp_prev) {
+static int ReadLinterpFile(struct LinterpEntryType *E, ZZIP_FILE * fp_base) {
 	ZZIP_FILE *fp;
 	int i;
 	char line[255];
 
-	fp = zzip_freopen(E->linterp_file, "r", fp_prev);
+	fp = zzip_freopen(E->linterp_file, "rq", fp_base);
 	if (fp==NULL) {
 		MakeDummyLinterp(E);
 		return (GD_E_OPEN_LINFILE);
@@ -1907,7 +1907,7 @@ static int ReadLinterpFile(struct LinterpEntryType *E, ZZIP_FILE * fp_prev) {
 	size_t nlines;
 	char *buf = read_file( fp );
 	char **lines = read_lines_from_buffer( buf, &nlines );
-	/* zzip_fclose(fp); */
+	zzip_fclose(fp);
 
 	/* first read the file to see how big it is */
 	/*
@@ -2045,7 +2045,7 @@ static int DoIfLinterp(int recurse_level,
 	/*****************************************/
 	/** if we got here, we found the field! **/
 	if (I->n_interp<0) {
-		*error_code = ReadLinterpFile(I, F->fp_prev);
+		*error_code = ReadLinterpFile(I, F->fp_base);
 		if (*error_code != GD_E_OK) {
 			*n_read = 0;
 			return(1);
