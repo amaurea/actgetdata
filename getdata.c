@@ -195,20 +195,19 @@ read_lines_from_buffer( char *buf, size_t *nlines )
 	return lines;
 }
 
-	static bool
-file_exists( const char *filename )
+static bool
+file_exists( const char *filename, ZZIP_FILE * ref)
 {
-	ZZIP_FILE *fp = zzip_fopen( filename, "r" );
+	ZZIP_FILE *fp = zzip_freopen(filename, "rq", ref);
 	if ( fp == NULL ) return false;
 	zzip_fclose( fp );
 	return true;
 }
 
-	static size_t
-file_size( const char *filename )
+static size_t
+file_size( const char *filename, ZZIP_FILE * ref)
 {
-	printf( "file_size: %s\n", filename );
-	ZZIP_FILE *fp = zzip_fopen( filename, "r" );
+	ZZIP_FILE *fp = zzip_freopen( filename, "rq", ref);
 	assert( fp != NULL ); 
 	ZZIP_STAT stat;
 	zzip_fstat( fp, &stat );
@@ -720,14 +719,14 @@ struct FormatType *GetFormat(const char *filedir, const char *linterp_prefix, in
 			snprintf(raw_data_filename, MAX_FILENAME_LENGTH+FIELD_LENGTH+2, 
 					"%s/%s", filedir, F->rawEntries[i].file);
 			//if (stat(raw_data_filename, &statbuf) >=0) {
-			if ( file_exists(raw_data_filename) ) {
+			if ( file_exists(raw_data_filename, F->fp_base) ) {
 				F->first_field = F->rawEntries[i];
 				break;
 			}
 			snprintf(raw_data_filename, MAX_FILENAME_LENGTH+FIELD_LENGTH+2, 
 					"%s/%s.slm", filedir, F->rawEntries[i].file);
 			//if (stat(raw_data_filename, &statbuf) >=0) {
-			if ( file_exists(raw_data_filename) ) {
+			if ( file_exists(raw_data_filename, F->fp_base) ) {
 				F->first_field = F->rawEntries[i];
 				break;
 			}
@@ -2203,7 +2202,7 @@ int GetNFrames(const struct FormatType *F, int *error_code, const char *in_field
 	snprintf(raw_data_filename, 2 * MAX_FILENAME_LENGTH + FIELD_LENGTH + 2, 
 			"%s/%s", F->FileDirName, F->first_field.file);
 	//if (stat(raw_data_filename, &statbuf) < 0) {
-	if ( !file_exists(raw_data_filename) ) {
+	if ( !file_exists(raw_data_filename, F->fp_base) ) {
 		snprintf(raw_data_filename, 2 * MAX_FILENAME_LENGTH + FIELD_LENGTH + 2, 
 				"%s/%s.slm", F->FileDirName, F->first_field.file);
 		st_size = slimrawsize(raw_data_filename);
@@ -2211,7 +2210,7 @@ int GetNFrames(const struct FormatType *F, int *error_code, const char *in_field
 			return(0);
 	} else
 	{
-		st_size = file_size( raw_data_filename );
+		st_size = file_size( raw_data_filename, F->fp_base);
 	}
 
 	nf = st_size/
