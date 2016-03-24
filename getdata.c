@@ -675,7 +675,7 @@ struct FormatType *GetFormat(const char *filedir, const char *linterp_prefix, in
 	snprintf(format_file, MAX_FILENAME_LENGTH+6, "%s/format", filedir);
 	fp = zzip_fopen(format_file, "r");
 	if (fp == NULL) {
-		printf("%s\n", format_file);
+		//printf("%s\n", format_file);
 		*error_code = GD_E_OPEN_FORMAT;
 		return (NULL);
 	}
