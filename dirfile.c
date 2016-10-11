@@ -92,7 +92,8 @@ void * ACTpolDirfile_read_channel( char typechar, const ACTpolDirfile *dirfile,
 		dirfile_print_errstatus(status);
 		return NULL;
 	}
-	assert( nframes > 0 );
+	/* We may have less than one whole frame, yet still have data */
+	/* assert( nframes > 0 ); */
 
 	int samples_per_frame = GetSamplesPerFrame( F, channelname, &status );
 	if ( status != GD_E_OK )
