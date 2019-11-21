@@ -11,9 +11,9 @@ libactgetdata.so: dirfile.o getdata.o
 	gcc -fPIC -c $(CFLAGS) -I. $<
 
 install: all
-	mkdir -p $(PREFIX)/include/actpol $(PREFIX)/lib
+	mkdir -p $(PREFIX)/include/actgetdata $(PREFIX)/lib
 	cp libactgetdata.a libactgetdata.so $(PREFIX)/lib
-	cp actpol/*.h $(PREFIX)/include/actpol
+	cp actgetdata/*.h $(PREFIX)/include/actgetdata
 
 clean:
 	rm -f *.o *.a *.so
