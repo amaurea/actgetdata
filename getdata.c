@@ -265,6 +265,19 @@ static void FreeF(struct FormatType *F) {
 	if (F->fp_base) zzip_fclose(F->fp_base);
 }
 
+char LookupType(const char * name) {
+	if     (strlen(name) == 1) return name[0];
+	else if(!strcmp(name, "UINT8"))   return 'c';
+	else if(!strcmp(name, "INT8"))    return 'c';
+	else if(!strcmp(name, "UINT16"))  return 'u';
+	else if(!strcmp(name, "INT16"))   return 's';
+	else if(!strcmp(name, "UINT32"))  return 'U';
+	else if(!strcmp(name, "INT32"))   return 'S';
+	else if(!strcmp(name, "FLOAT32")) return 'f';
+	else if(!strcmp(name, "FLOAT64")) return 'd';
+	else return '?';
+}
+
 /***************************************************************************/
 /*																																				 */
 /*	 ParseRaw: parse a RAW data type in the formats file									 */
@@ -285,7 +298,9 @@ static void ParseRaw(char in_cols[MAX_IN_COLS][MAX_LINE_LENGTH],
 	}
 	//R->fp = -1; /* file not opened yet */
 	//R->slim = NULL; /* No SLIMFILE either */
-	switch (in_cols[2][0]) {
+	
+	char type = LookupType(in_cols[2]);
+	switch (type) {
 		case 'c':
 			R->size = 1;
 			break;
@@ -299,11 +314,11 @@ static void ParseRaw(char in_cols[MAX_IN_COLS][MAX_LINE_LENGTH],
 			R->size = 8;
 			break;
 		default:
-			printf("bad raw %c\n", in_cols[2][0]);
+			printf("bad raw %c %s\n", type, in_cols[2]);
 			*error_code = GD_E_FORMAT;
 			return;
 	}
-	R->type = in_cols[2][0];
+	R->type = type;
 	R->samples_per_frame = atoi(in_cols[3]);
 	if (R->samples_per_frame<=0) {
 		*error_code = GD_E_FORMAT;
@@ -533,6 +548,9 @@ static int ParseFormatFile(ZZIP_FILE* fp, struct FormatType *F, const char* file
 		//printf( "%s: %d\n", lines[i], n_cols );
 		if (n_cols<2) {
 			error_code = GD_E_FORMAT;
+		} else if (in_cols[0][0] == '/') {
+			// Ignore metadata like /VERSION for now
+			continue;
 		} else if (strlen(in_cols[0])>FIELD_LENGTH) {
 			error_code = GD_E_FIELD;
 		} else if (strcmp(in_cols[1], "RAW")==0) {

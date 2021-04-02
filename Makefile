@@ -1,12 +1,12 @@
 PREFIX ?= /usr
-CFLAGS ?= -O2
+CFLAGS ?= -O2 -g
 CC     ?= gcc
 
 all: libactgetdata.a libactgetdata.so
 libactgetdata.a: getdata.o dirfile.o
 	ar crs $@ $^
 libactgetdata.so: dirfile.o getdata.o
-	$(CC) -shared -fPIC -o $@ -I. $^ $(LDFLAGS) -lzzip -lslim -lc
+	$(CC) $(CFLAGS) -shared -fPIC -o $@ -I. $^ $(LDFLAGS) -lzzip -lslim -lc
 
 %.o: %.c
 	$(CC) -fPIC -c $(CFLAGS) -I. $<
