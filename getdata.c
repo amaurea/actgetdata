@@ -19,7 +19,7 @@
 #include <slimlib.h>
 #include <zzip/zzip.h>
 
-#include "actpol/getdata.h"
+#include "actgetdata/getdata.h"
 
 /***************************************************************/
 /*																														 */

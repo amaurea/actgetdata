@@ -5,8 +5,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "actpol/dirfile.h"
-#include "actpol/getdata.h"
+#include "actgetdata/dirfile.h"
+#include "actgetdata/getdata.h"
 
 #define dirfile_print_errstatus(STATUS) {\
 	if ( STATUS != GD_E_OK ) \
